@@ -5,6 +5,7 @@ import InputField from '@/components/forms/InputField';
 import {INVESTMENT_GOALS, PREFERRED_INDUSTRIES, RISK_TOLERANCE_OPTIONS} from "@/lib/constants";
 import SelectField from '@/components/forms/SelectField';
 import {CountrySelectField} from '@/components/forms/CountrySelectField';
+import FooterLink from '@/components/forms/FooterLink';
 
 const SignUp = () => {
     const {
@@ -42,7 +43,7 @@ const SignUp = () => {
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-5'>
           <InputField
             name="fullName"
-            label="Full Name"
+            label="FullName"
             placeholder="John Doe"
             register={register}
             error={errors.fullName}
@@ -106,6 +107,8 @@ const SignUp = () => {
           <Button type="submit" disabled={isSubmitting} className='yellow-btn w-full mt-5'>
               {isSubmitting?'Creating Account':'Start Your Investing Journey'}
           </Button>
+
+          <FooterLink text="Already have an account?" linkText='Sign in' href='/sign-in'/>
         </form>
     </>
   )
