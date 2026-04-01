@@ -45,10 +45,8 @@ export const sendSignUpEmail = inngest.createFunction(
         await step.run('send-welcome-email', async () => {
                 const part = response.candidates?.[0]?.content?.parts?.[0];
                 const introText = (part && 'text' in part ? part.text : null) ||'Thanks for joining Binivex. You now have the tools to track markets and make smarter moves.'
-    
-                // const { data: { email, name } } = event;
-    
-                // return await sendWelcomeEmail({ email, name, intro: introText });
+                const { data: { email, name } } = event;
+                return await sendWelcomeEmail({ email, name, intro: introText });
         })
 
         return {
