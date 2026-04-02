@@ -7,7 +7,7 @@ const InputField = ({name,label,placeholder,type="text",register,error,validatio
   return (
     <div className='spcae-y-2'>
         <Label htmlFor={name} className='form-label'>
-            Label
+            {label}
         </Label>
         <Input
             type={type}
