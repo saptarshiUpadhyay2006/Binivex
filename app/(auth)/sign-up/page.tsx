@@ -6,8 +6,13 @@ import {INVESTMENT_GOALS, PREFERRED_INDUSTRIES, RISK_TOLERANCE_OPTIONS} from "@/
 import SelectField from '@/components/forms/SelectField';
 import {CountrySelectField} from '@/components/forms/CountrySelectField';
 import FooterLink from '@/components/forms/FooterLink';
+import { useRouter } from 'next/navigation';
+import { signUpEmail } from 'better-auth/api';
+import { toast } from 'sonner';
+import { signUpWithEmail } from '@/lib/actions/auth.actions';
 
 const SignUp = () => {
+    const router=useRouter();
     const {
         register,
         handleSubmit,
@@ -25,17 +30,47 @@ const SignUp = () => {
       },
       mode: 'onBlur'
   }, );
-  const onSubmit = async (data: SignUpFormData) => {
-    try {
-      console.log(data);
-        // const result = await signUpWithEmail(data);
-        // if(result.success) router.push('/');
-    } catch (e) {
-        console.error(e);
-        // toast.error('Sign up failed', {
-        //     description: e instanceof Error ? e.message : 'Failed to create an account.'
-        // })
-    }
+//   const onSubmit = async (data: SignUpFormData) => {
+//     try {
+//         const result = await signUpWithEmail(data);
+//         console.log("RESULT 👉", result);
+//         if(result.success) {
+//           console.log("Redirecting...");
+//           router.push('/');
+//         }
+//     } catch (e) {
+//       console.error(e); 
+//         toast.error('Sign up failed', {
+//             description: e instanceof Error ? e.message : 'Failed to create an account.'
+//         })
+//     }
+// }
+const onSubmit = async (data: SignUpFormData) => {
+  try {
+      const result = await signUpWithEmail(data);
+      console.log("RESULT 👉", result); 
+
+      // Make sure to use optional chaining in case result is undefined
+      if(result?.success) {
+        console.log("Redirecting...");
+        
+        // 1. Tell Next.js to clear the client cache and refetch server components
+        router.refresh(); 
+        
+        // 2. Then route to the home page
+        router.push('/');
+      } else {
+        // Handle the case where the server action completes but returns a failure
+        toast.error('Sign up failed', {
+           description: result?.error || 'Please check your information and try again.'
+        });
+      }
+  } catch (e) {
+      console.error(e); 
+      toast.error('Sign up failed', {
+          description: e instanceof Error ? e.message : 'Failed to create an account.'
+      })
+  }
 }
   return (
     <>
@@ -56,7 +91,13 @@ const SignUp = () => {
             placeholder="doe@gmail.com"
             register={register}
             error={errors.email}
-            validation={{required:'Email is required',pattern:/^\w+@\w+\.\w+$/,message: 'Email address is required' }}
+            validation={{ 
+              required: 'Email is required', 
+              pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Invalid email address"
+              }
+          }}
           />
           <InputField
                     name="password"

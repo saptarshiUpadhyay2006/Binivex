@@ -134,6 +134,10 @@ declare global {
     type WatchlistTableProps = {
         watchlist: StockWithData[];
     };
+    type UserForNewsEmail = {
+        email: string;
+        name?: string;
+    };
 
     type StockWithData = {
         userId: string;
