@@ -7,9 +7,10 @@ import SelectField from '@/components/forms/SelectField';
 import {CountrySelectField} from '@/components/forms/CountrySelectField';
 import FooterLink from '@/components/forms/FooterLink';
 import { useRouter } from 'next/navigation';
-import { signUpEmail } from 'better-auth/api';
 import { toast } from 'sonner';
 import { signUpWithEmail } from '@/lib/actions/auth.actions';
+import { Github, Mail, Loader2 } from 'lucide-react';
+import { authClient } from '@/lib/better-auth/auth-client';
 
 const SignUp = () => {
     const router=useRouter();
@@ -30,40 +31,16 @@ const SignUp = () => {
       },
       mode: 'onBlur'
   }, );
-//   const onSubmit = async (data: SignUpFormData) => {
-//     try {
-//         const result = await signUpWithEmail(data);
-//         console.log("RESULT 👉", result);
-//         if(result.success) {
-//           console.log("Redirecting...");
-//           router.push('/');
-//         }
-//     } catch (e) {
-//       console.error(e); 
-//         toast.error('Sign up failed', {
-//             description: e instanceof Error ? e.message : 'Failed to create an account.'
-//         })
-//     }
-// }
+
 const onSubmit = async (data: SignUpFormData) => {
   try {
       const result = await signUpWithEmail(data);
-      console.log("RESULT 👉", result); 
-
-      // Make sure to use optional chaining in case result is undefined
       if(result?.success) {
-        console.log("Redirecting...");
-        
-        // 1. Tell Next.js to clear the client cache and refetch server components
+        toast.success('Account created successfully');
         router.refresh(); 
-        
-        // 2. Then route to the home page
         router.push('/');
       } else {
-        // Handle the case where the server action completes but returns a failure
-        toast.error('Sign up failed', {
-           description: result?.error || 'Please check your information and try again.'
-        });
+        toast.error(result?.error || 'Sign up failed');
       }
   } catch (e) {
       console.error(e); 
@@ -72,13 +49,63 @@ const onSubmit = async (data: SignUpFormData) => {
       })
   }
 }
-  return (
+    return (
     <>
         <h1 className='form-title'>Sign Up & Personalize</h1>
-        <form onSubmit={handleSubmit(onSubmit)} className='space-y-5'>
+
+        <div className="flex flex-col gap-4 mb-8">
+            <Button 
+                variant="outline" 
+                className="social-btn"
+                onClick={async () => {
+                    try {
+                        console.log("GitHub login initiated");
+                        toast.info("Connecting to GitHub...");
+                        await authClient.signIn.social({
+                            provider: "github",
+                            callbackURL: "/",
+                        });
+                    } catch (error) {
+                        console.error("GitHub login error:", error);
+                        toast.error("Could not connect to GitHub");
+                    }
+                }}
+            >
+                <Github size={20} />
+                Continue with GitHub
+            </Button>
+            <Button 
+                variant="outline" 
+                className="social-btn"
+                onClick={async () => {
+                    try {
+                        console.log("Google login initiated");
+                        toast.info("Connecting to Google...");
+                        await authClient.signIn.social({
+                            provider: "google",
+                            callbackURL: "/",
+                        });
+                    } catch (error) {
+                        console.error("Google login error:", error);
+                        toast.error("Could not connect to Google");
+                    }
+                }}
+            >
+                <Mail size={20} />
+                Continue with Google
+            </Button>
+        </div>
+
+        <div className="divider-container">
+            <div className="divider-line" />
+            <span className="divider-text">OR CONTINUE WITH EMAIL</span>
+            <div className="divider-line" />
+        </div>
+
+        <form onSubmit={handleSubmit(onSubmit)} className='space-y-5 mt-6'>
           <InputField
             name="fullName"
-            label="FullName"
+            label="Full Name"
             placeholder="John Doe"
             register={register}
             error={errors.fullName}
@@ -117,24 +144,26 @@ const onSubmit = async (data: SignUpFormData) => {
                     required
           />
 
-          <SelectField
-                    name="investmentGoals"
-                    label="Investment Goals"
-                    placeholder="Select your investment goal"
-                    options={INVESTMENT_GOALS}
-                    control={control}
-                    error={errors.investmentGoals}
-                    required
-          />
-          <SelectField
-                    name="riskTolerance"
-                    label="Risk Tolerance"
-                    placeholder="Select your risk level"
-                    options={RISK_TOLERANCE_OPTIONS}
-                    control={control}
-                    error={errors.riskTolerance}
-                    required
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <SelectField
+                        name="investmentGoals"
+                        label="Investment Goals"
+                        placeholder="Select Goal"
+                        options={INVESTMENT_GOALS}
+                        control={control}
+                        error={errors.investmentGoals}
+                        required
+            />
+            <SelectField
+                        name="riskTolerance"
+                        label="Risk Tolerance"
+                        placeholder="Select Risk"
+                        options={RISK_TOLERANCE_OPTIONS}
+                        control={control}
+                        error={errors.riskTolerance}
+                        required
+            />
+          </div>
 
           <SelectField
                     name="preferredIndustry"
@@ -146,7 +175,12 @@ const onSubmit = async (data: SignUpFormData) => {
                     required
            />
           <Button type="submit" disabled={isSubmitting} className='yellow-btn w-full mt-5'>
-              {isSubmitting?'Creating Account':'Start Your Investing Journey'}
+              {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                      <Loader2 className="animate-spin" size={18} />
+                      Creating Account...
+                  </div>
+              ) : 'Start Your Investing Journey'}
           </Button>
 
           <FooterLink text="Already have an account?" linkText='Sign in' href='/sign-in'/>

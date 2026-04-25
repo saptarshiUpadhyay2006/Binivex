@@ -17,8 +17,10 @@ const NavItems = ({initialStocks}: { initialStocks: StockWithWatchlistStatus[]})
     return (
         <ul className="flex flex-col sm:flex-row p-2 gap-3 sm:gap-10 font-medium">
             {NAV_ITEMS.map(({ href, label }) => {
+                const active = isActive(href);
+
                 if(href === '/search') return (
-                    <li key="search-trigger">
+                    <li key="search-trigger" className="flex items-center">
                         <SearchCommand
                             renderAs="text"
                             label="Search"
@@ -27,13 +29,21 @@ const NavItems = ({initialStocks}: { initialStocks: StockWithWatchlistStatus[]})
                     </li>
                 )
 
-                return <li key={href}>
-                    <Link href={href} className={`hover:text-yellow-500 transition-colors ${
-                        isActive(href) ? 'text-gray-100' : ''
-                    }`}>
-                        {label}
-                    </Link>
-                </li>
+                return (
+                    <li key={href} className="relative flex items-center h-full">
+                        <Link 
+                            href={href} 
+                            className={`relative py-1 transition-all duration-300 hover:text-yellow-500 ${
+                                active ? 'text-gray-100' : 'text-gray-400'
+                            }`}
+                        >
+                            {label}
+                            {active && (
+                                <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-yellow-500 rounded-full shadow-[0_0_8px_rgba(232,186,64,0.6)]" />
+                            )}
+                        </Link>
+                    </li>
+                )
             })}
         </ul>
     )

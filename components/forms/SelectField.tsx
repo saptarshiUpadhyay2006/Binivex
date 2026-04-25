@@ -10,8 +10,8 @@ import {
 
 const SelectField = ({ name, label, placeholder, options, control, error, required = false }: SelectFieldProps) => {
     return (
-        <div className="space-y-2">
-            <Label htmlFor={name} className="form-label">{label}</Label>
+        <div className="space-y-2.5 transition-all duration-300">
+            <Label htmlFor={name} className="form-label mb-1.5 inline-block">{label}</Label>
 
             <Controller
                 name={name}
@@ -31,7 +31,7 @@ const SelectField = ({ name, label, placeholder, options, control, error, requir
                                 </SelectItem>
                             ))}
                         </SelectContent>
-                        {error && <p className="text-sm text-red-500">{error.message}</p>}
+                        {error && <p className="text-xs font-medium text-red-500 animate-in fade-in slide-in-from-top-1 duration-300">{error.message}</p>}
                     </Select>
                 )}
             />
