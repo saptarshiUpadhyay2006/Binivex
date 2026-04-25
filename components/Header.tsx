@@ -13,9 +13,9 @@ const Header =async ({user}:{user:User}) => {
     <header className='sticky top-0 header'>
       <div className='container header-wrapper'>
           <Link href="/">
-            <Image src="/assets/icons/logo.svg" alt="Binivex Logo" width={50}
-    height={50}
-    className="h-8 w-auto cursor-pointer"/>
+            <Image src="/assets/icons/logo.svg" alt="Binivex Logo" width={60}
+    height={60}
+    className="h-10 md:h-12 w-auto cursor-pointer transition-transform hover:scale-105 active:scale-95"/>
           </Link>
           <nav className='hidden sm:block'>
             {/*nav items*/}
