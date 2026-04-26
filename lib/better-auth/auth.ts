@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
+import { ObjectId } from "mongodb";
 import { connectToDatabase } from "@/database/mongoose";
 import { inngest } from "@/lib/inngest/client";
 import { nextCookies } from "better-auth/next-js";
@@ -61,12 +62,18 @@ const createAuth = (db: any) => {
                             const db = mongoose.connection.db;
                             
                             // Try to find the user by id or email (session might only have userId)
-                            const user = await db?.collection('user').findOne({ 
-                                $or: [
-                                    { id: session.userId },
-                                    { _id: session.userId }
-                                ]
-                            });
+                            let query: any = { id: session.userId };
+                            
+                            // If it looks like a MongoDB ObjectId, try that too
+                            if (session.userId && session.userId.length === 24) {
+                                try {
+                                    query = { $or: [ { id: session.userId }, { _id: new ObjectId(session.userId) } ] };
+                                } catch (e) {
+                                    // Not a valid ObjectId format, stick to string id
+                                }
+                            }
+
+                            const user = await db?.collection('user').findOne(query);
 
                             if (user) {
                                 console.log(`User found for login alert: ${user.email}`);
