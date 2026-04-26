@@ -11,6 +11,10 @@ import {
 import { getAuth } from "@/lib/better-auth/auth";
 import { headers } from "next/headers";
 import { getWatchlistSymbolsByEmail } from "@/lib/actions/watchlist.actions";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
+
 
 export default async function StockDetails({ params }: StockDetailsPageProps) {
   const { symbol } = await params;

@@ -27,7 +27,8 @@ export async function getNews(symbols?: string[]): Promise<MarketNewsArticle[]> 
     const range = getDateRange(5);
     const token = process.env.FINNHUB_API_KEY ?? NEXT_PUBLIC_FINNHUB_API_KEY;
     if (!token) {
-      throw new Error('FINNHUB API key is not configured');
+      console.error('FINNHUB API key is not configured');
+      return [];
     }
     const cleanSymbols = (symbols || [])
       .map((s) => s?.trim().toUpperCase())
@@ -181,7 +182,10 @@ export const searchStocks = cache(async (query?: string): Promise<StockWithWatch
 export const getQuote = cache(async (symbol: string): Promise<QuoteData> => {
   try {
     const token = process.env.FINNHUB_API_KEY ?? NEXT_PUBLIC_FINNHUB_API_KEY;
-    if (!token) throw new Error('FINNHUB API key is not configured');
+    if (!token) {
+      console.error('FINNHUB API key is not configured');
+      return {} as QuoteData;
+    }
 
     const url = `${FINNHUB_BASE_URL}/quote?symbol=${encodeURIComponent(symbol)}&token=${token}`;
     return await fetchJSON<QuoteData>(url, 60);
