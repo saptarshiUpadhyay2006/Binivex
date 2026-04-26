@@ -33,37 +33,57 @@ const createAuth = (db: any) => {
             user: {
                 create: {
                     after: async (user) => {
-                        await inngest.send({
-                            name: 'app/user.created',
-                            data: {
-                                email: user.email,
-                                name: user.name,
-                                // These might be undefined for social logins, handled in Inngest function
-                                country: (user as any).country,
-                                investmentGoals: (user as any).investmentGoals,
-                                riskTolerance: (user as any).riskTolerance,
-                                preferredIndustry: (user as any).preferredIndustry
-                            }
-                        });
+                        try {
+                            console.log(`Signup hook triggered for user: ${user.email}`);
+                            await inngest.send({
+                                name: 'app/user.created',
+                                data: {
+                                    email: user.email,
+                                    name: user.name,
+                                    country: (user as any).country,
+                                    investmentGoals: (user as any).investmentGoals,
+                                    riskTolerance: (user as any).riskTolerance,
+                                    preferredIndustry: (user as any).preferredIndustry
+                                }
+                            });
+                        } catch (error) {
+                            console.error("Error in signup database hook:", error);
+                        }
                     }
                 }
             },
             session: {
                 create: {
                     after: async (session) => {
-                        // Get the user to get their name
-                        const mongoose = await connectToDatabase();
-                        const db = mongoose.connection.db;
-                        const user = await db?.collection('user').findOne({ id: session.userId });
-                        
-                        await inngest.send({
-                            name: 'app/user.logged-in',
-                            data: {
-                                email: user?.email,
-                                name: user?.name,
-                                timestamp: new Date().toLocaleString()
+                        try {
+                            console.log(`Login hook triggered for session: ${session.id}, userId: ${session.userId}`);
+                            const mongoose = await connectToDatabase();
+                            const db = mongoose.connection.db;
+                            
+                            // Try to find the user by id or email (session might only have userId)
+                            const user = await db?.collection('user').findOne({ 
+                                $or: [
+                                    { id: session.userId },
+                                    { _id: session.userId }
+                                ]
+                            });
+
+                            if (user) {
+                                console.log(`User found for login alert: ${user.email}`);
+                                await inngest.send({
+                                    name: 'app/user.logged-in',
+                                    data: {
+                                        email: user.email,
+                                        name: user.name,
+                                        timestamp: new Date().toLocaleString()
+                                    }
+                                });
+                            } else {
+                                console.warn(`No user found in DB for userId: ${session.userId}`);
                             }
-                        });
+                        } catch (error) {
+                            console.error("Error in login database hook:", error);
+                        }
                     }
                 }
             }

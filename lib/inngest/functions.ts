@@ -38,6 +38,10 @@ export const sendSignUpEmail = inngest.createFunction(
             const introText = (part && 'text' in part ? part.text : null) ||'Thanks for joining Binivex. You now have the tools to track markets and make smarter moves.'
 
             const { data: { email, name } } = event;
+            if (!email) {
+                console.error("Inngest: No email found in event data for sign-up");
+                return { skipped: true, reason: "No email" };
+            }
 
             return await sendWelcomeEmail({ email, name: name || 'Valued User', intro: introText });
         })
@@ -56,6 +60,11 @@ export const sendLoginAlert = inngest.createFunction(
     },
     async ({ event, step }) => {
         const { data: { email, name, timestamp } } = event;
+
+        if (!email) {
+            console.error("Inngest: No email found in event data for login alert");
+            return { skipped: true, reason: "No email" };
+        }
 
         await step.run('send-login-email', async () => {
             return await sendLoginAlertEmail({ 
