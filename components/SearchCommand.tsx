@@ -1,9 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { CommandDialog, CommandEmpty, CommandInput, CommandList } from "@/components/ui/command"
+import {CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from "@/components/ui/command"
 import {Button} from "@/components/ui/button";
-import {Loader2,  TrendingUp} from "lucide-react";
+import {Loader2, Search, TrendingUp} from "lucide-react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {searchStocks} from "@/lib/actions/finnhub.actions";
 import {useDebounce} from "@/hooks/useDebounce";
@@ -13,9 +14,14 @@ export default function SearchCommand({ renderAs = 'button', label = 'Add stock'
   const [searchTerm, setSearchTerm] = useState("")
   const [loading, setLoading] = useState(false)
   const [stocks, setStocks] = useState<StockWithWatchlistStatus[]>(initialStocks);
+  const router = useRouter();
 
   const isSearchMode = !!searchTerm.trim();
   const displayStocks = isSearchMode ? stocks : stocks?.slice(0, 10);
+
+  useEffect(() => {
+    setStocks(initialStocks);
+  }, [initialStocks]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -65,7 +71,12 @@ export default function SearchCommand({ renderAs = 'button', label = 'Add stock'
             {label}
           </Button>
       )}
-      <CommandDialog open={open} onOpenChange={setOpen} className="search-dialog">
+      <CommandDialog 
+        open={open} 
+        onOpenChange={setOpen} 
+        className="search-dialog"
+        shouldFilter={false}
+      >
         <div className="search-field">
           <CommandInput value={searchTerm} onValueChange={setSearchTerm} placeholder="Search stocks..." className="search-input" />
           {loading && <Loader2 className="search-loader" />}
@@ -78,32 +89,29 @@ export default function SearchCommand({ renderAs = 'button', label = 'Add stock'
                 {isSearchMode ? 'No results found' : 'No stocks available'}
               </div>
             ) : (
-            <ul>
-              <div className="search-count">
-                {isSearchMode ? 'Search results' : 'Popular stocks'}
-                {` `}({displayStocks?.length || 0})
-              </div>
-              {displayStocks?.map((stock, i) => (
-                  <li key={stock.symbol} className="search-item">
-                    <Link
-                        href={`/stocks/${stock.symbol}`}
-                        onClick={handleSelectStock}
-                        className="search-item-link"
-                    >
-                      <TrendingUp className="h-4 w-4 text-gray-500" />
-                      <div  className="flex-1">
-                        <div className="search-item-name">
-                          {stock.name}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {stock.symbol} | {stock.exchange } | {stock.type}
-                        </div>
-                      </div>
-                    {/*<Star />*/}
-                    </Link>
-                  </li>
+            <CommandGroup heading={isSearchMode ? 'Search results' : 'Popular stocks'}>
+              {displayStocks?.map((stock) => (
+                <CommandItem
+                  key={stock.symbol}
+                  value={stock.symbol}
+                  onSelect={() => {
+                    handleSelectStock();
+                    router.push(`/stocks/${stock.symbol}`);
+                  }}
+                  className="search-item cursor-pointer"
+                >
+                  <TrendingUp className="h-4 w-4 text-gray-500" />
+                  <div className="flex-1">
+                    <div className="search-item-name font-medium text-gray-100">
+                      {stock.name}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {stock.symbol} | {stock.exchange} | {stock.type}
+                    </div>
+                  </div>
+                </CommandItem>
               ))}
-            </ul>
+            </CommandGroup>
           )
           }
         </CommandList>
