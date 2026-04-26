@@ -3,13 +3,12 @@
 import { useEffect, useState } from "react"
 import {CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from "@/components/ui/command"
 import {Button} from "@/components/ui/button";
-import {Loader2, Search, TrendingUp} from "lucide-react";
+import {Loader2, Search, TrendingUp, Star} from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {searchStocks} from "@/lib/actions/finnhub.actions";
 import {useDebounce} from "@/hooks/useDebounce";
-
-export default function SearchCommand({ renderAs = 'button', label = 'Add stock', initialStocks }: SearchCommandProps) {
+export default function SearchCommand({ renderAs = 'button', label = 'Add stock', initialStocks, watchlistSymbols = [] }: SearchCommandProps) {
   const [open, setOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [loading, setLoading] = useState(false)
@@ -100,13 +99,22 @@ export default function SearchCommand({ renderAs = 'button', label = 'Add stock'
                   }}
                   className="search-item cursor-pointer"
                 >
-                  <TrendingUp className="h-4 w-4 text-gray-500" />
-                  <div className="flex-1">
-                    <div className="search-item-name font-medium text-gray-100">
-                      {stock.name}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {stock.symbol} | {stock.exchange} | {stock.type}
+                  <div className="flex items-center gap-3 w-full">
+                    {watchlistSymbols.includes(stock.symbol) ? (
+                        <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                    ) : (
+                        <TrendingUp className="h-4 w-4 text-gray-500" />
+                    )}
+                    <div className="flex-1">
+                      <div className="search-item-name font-medium text-gray-100 flex items-center gap-2">
+                        {stock.name}
+                        {watchlistSymbols.includes(stock.symbol) && (
+                            <span className="text-[10px] bg-yellow-500/10 text-yellow-500 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-tighter">Added</span>
+                        )}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {stock.symbol} | {stock.exchange} | {stock.type}
+                      </div>
                     </div>
                   </div>
                 </CommandItem>

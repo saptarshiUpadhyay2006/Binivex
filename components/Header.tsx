@@ -4,11 +4,15 @@ import Image from "next/image";
 import NavItems from './NavItems';
 import UserDropdown from './UserDropdown';
 import { searchStocks } from '@/lib/actions/finnhub.actions';
+import { getWatchlist } from '@/lib/actions/watchlist.actions';
 
 
 const Header =async ({user}:{user:User}) => {
 
   const initialStocks=await searchStocks();
+  const watchlist = user?.email ? await getWatchlist(user.email) : [];
+  const watchlistCount = watchlist.length;
+  const watchlistSymbols = watchlist.map(i => i.symbol);
   return (
     <header className='sticky top-0 header'>
       <div className='container header-wrapper'>
@@ -19,9 +23,9 @@ const Header =async ({user}:{user:User}) => {
           </Link>
           <nav className='hidden sm:block'>
             {/*nav items*/}
-            <NavItems initialStocks={initialStocks}/>
+            <NavItems initialStocks={initialStocks} watchlistCount={watchlistCount} watchlistSymbols={watchlistSymbols}/>
           </nav>
-          <UserDropdown user={user} initialStocks={initialStocks}/>
+          <UserDropdown user={user} initialStocks={initialStocks} watchlistCount={watchlistCount} watchlistSymbols={watchlistSymbols}/>
       </div>
     </header>
   )

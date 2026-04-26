@@ -1,5 +1,5 @@
 
-import { searchStocks } from './lib/actions/finnhub.actions';
+import { searchStocks } from '../lib/actions/finnhub.actions';
 import dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });

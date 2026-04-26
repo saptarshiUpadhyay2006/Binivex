@@ -1,10 +1,12 @@
 import React from 'react';
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { headers } from 'next/headers';
-import { auth } from '@/lib/better-auth/auth';
+import { getAuth } from '@/lib/better-auth/auth';
 import { redirect } from 'next/navigation';
 
 const Layout =async ({children}:{children:React.ReactNode}) => {
+  const auth = await getAuth();
   const session=await auth.api.getSession({
     headers:await headers()
   });
@@ -18,12 +20,13 @@ const Layout =async ({children}:{children:React.ReactNode}) => {
     email:session.user.email,
   }
   return (
-    <main className='min-h-screen text-gray-400'>
+    <div className='min-h-screen flex flex-col text-gray-400'>
         <Header user={user}/>
-        <div className='container py-10'>
+        <main className='flex-1 container py-10'>
             {children}
-        </div>
-    </main>
+        </main>
+        <Footer />
+    </div>
   )
 }
 

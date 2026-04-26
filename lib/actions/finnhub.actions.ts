@@ -178,3 +178,15 @@ export const searchStocks = cache(async (query?: string): Promise<StockWithWatch
     return [];
   }
 });
+export const getQuote = cache(async (symbol: string): Promise<QuoteData> => {
+  try {
+    const token = process.env.FINNHUB_API_KEY ?? NEXT_PUBLIC_FINNHUB_API_KEY;
+    if (!token) throw new Error('FINNHUB API key is not configured');
+
+    const url = `${FINNHUB_BASE_URL}/quote?symbol=${encodeURIComponent(symbol)}&token=${token}`;
+    return await fetchJSON<QuoteData>(url, 60);
+  } catch (err) {
+    console.error('getQuote error for', symbol, err);
+    return {};
+  }
+});

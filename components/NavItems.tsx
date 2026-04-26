@@ -5,7 +5,7 @@ import Link from "next/link";
 import {usePathname} from "next/navigation";
 import SearchCommand from "@/components/SearchCommand";
 
-const NavItems = ({initialStocks}: { initialStocks: StockWithWatchlistStatus[]}) => {
+const NavItems = ({initialStocks, watchlistCount, watchlistSymbols}: { initialStocks: StockWithWatchlistStatus[], watchlistCount?: number, watchlistSymbols?: string[]}) => {
     const pathname = usePathname()
 
     const isActive = (path: string) => {
@@ -25,6 +25,7 @@ const NavItems = ({initialStocks}: { initialStocks: StockWithWatchlistStatus[]})
                             renderAs="text"
                             label="Search"
                             initialStocks={initialStocks}
+                            watchlistSymbols={watchlistSymbols}
                         />
                     </li>
                 )
@@ -38,6 +39,11 @@ const NavItems = ({initialStocks}: { initialStocks: StockWithWatchlistStatus[]})
                             }`}
                         >
                             {label}
+                            {label === 'Watchlist' && typeof watchlistCount === 'number' && watchlistCount > 0 && (
+                                <span className="ml-1 px-1.5 py-0.5 text-[10px] bg-yellow-500 text-black font-bold rounded-full">
+                                    {watchlistCount}
+                                </span>
+                            )}
                             {active && (
                                 <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-yellow-500 rounded-full shadow-[0_0_8px_rgba(232,186,64,0.6)]" />
                             )}
