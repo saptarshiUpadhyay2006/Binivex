@@ -46,7 +46,14 @@ export const getAuth = async () => {
     if (!db) throw new Error('MongoDB connection not found');
 
     // 4. Initialize using the factory
-    authInstance = createAuth(db);
+    try {
+        console.log(`Initializing Better Auth with baseURL: ${process.env.BETTER_AUTH_URL}`);
+        authInstance = createAuth(db);
+        console.log("Better Auth initialized successfully");
+    } catch (error) {
+        console.error("Failed to initialize Better Auth:", error);
+        throw error;
+    }
 
     return authInstance;
 };

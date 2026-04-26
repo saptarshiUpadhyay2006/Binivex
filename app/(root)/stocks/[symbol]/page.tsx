@@ -18,11 +18,21 @@ import { Sparkles } from "lucide-react";
 
 export default async function StockDetails({ params }: StockDetailsPageProps) {
   const { symbol } = await params;
-  const auth = await getAuth();
-  const session = await auth.api.getSession({
-    headers: await headers()
-  });
-  const watchlistSymbols = session?.user?.email ? await getWatchlistSymbolsByEmail(session.user.email) : [];
+  let session = null;
+  let watchlistSymbols: string[] = [];
+  
+  try {
+    const auth = await getAuth();
+    session = await auth.api.getSession({
+      headers: await headers()
+    });
+    if (session?.user?.email) {
+      watchlistSymbols = await getWatchlistSymbolsByEmail(session.user.email);
+    }
+  } catch (error) {
+    console.error("Error fetching session or watchlist in StockDetails:", error);
+  }
+
   const isInWatchlist = watchlistSymbols.includes(symbol.toUpperCase());
   
   const scriptUrl = `https://s3.tradingview.com/external-embedding/embed-widget-`;

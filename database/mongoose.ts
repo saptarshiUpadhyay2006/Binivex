@@ -30,11 +30,12 @@ export const connectToDatabase= async ()=>{
         cached.conn=await cached.promise;
     }
     catch(err){
+        console.error('CRITICAL: MongoDB connection failed:', err);
         cached.promise=null;
         throw err;
     }
 
-    console.log(`Connected to database ${process.env.NODE_ENV}-${MONGODB_URI}`);
+    console.log(`SUCCESS: Connected to MongoDB cluster`);
 
     return cached.conn;
 }
