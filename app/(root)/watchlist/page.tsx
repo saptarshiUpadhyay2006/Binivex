@@ -65,35 +65,35 @@ export default async function WatchlistPage() {
                         <table className="w-full text-left">
                             <thead className="bg-white/5 text-gray-500 text-xs uppercase tracking-widest font-bold">
                                 <tr>
-                                    <th className="px-6 py-4">Symbol</th>
-                                    <th className="px-6 py-4">Company</th>
-                                    <th className="px-6 py-4 text-right">Price</th>
-                                    <th className="px-6 py-4 text-right">Change</th>
-                                    <th className="px-6 py-4 text-center">Action</th>
+                                    <th className="px-4 md:px-6 py-4">Symbol</th>
+                                    <th className="hidden md:table-cell px-6 py-4">Company</th>
+                                    <th className="px-4 md:px-6 py-4 text-right">Price</th>
+                                    <th className="hidden sm:table-cell px-6 py-4 text-right">Change</th>
+                                    <th className="px-4 md:px-6 py-4 text-center"><span className="hidden md:inline">Action</span></th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
                                 {itemsWithQuotes.map((item) => (
-                                    <tr key={item.symbol} className="hover:bg-white/[0.02] transition-colors group">
-                                        <td className="px-6 py-5">
+                                    <tr key={item.symbol} className="hover:bg-white/[0.02] transition-colors group text-sm md:text-base">
+                                        <td className="px-4 md:px-6 py-4 md:py-5">
                                             <Link href={`/stocks/${item.symbol}`} className="font-bold text-white hover:text-yellow-500 transition-colors">
                                                 {item.symbol}
                                             </Link>
                                         </td>
-                                        <td className="px-6 py-5 text-gray-400 font-medium">
+                                        <td className="hidden md:table-cell px-6 py-5 text-gray-400 font-medium text-xs">
                                             {item.company}
                                         </td>
-                                        <td className="px-6 py-5 text-right font-mono text-white">
+                                        <td className="px-4 md:px-6 py-4 md:py-5 text-right font-mono text-white text-xs md:text-sm">
                                             ${item.price?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '---'}
                                         </td>
-                                        <td className={`px-6 py-5 text-right font-medium ${(item.change || 0) >= 0 ? 'text-green-400' : 'text-red-400'
+                                        <td className={`hidden sm:table-cell px-6 py-5 text-right font-medium text-xs md:text-sm ${(item.change || 0) >= 0 ? 'text-green-400' : 'text-red-400'
                                             }`}>
                                             <div className="flex items-center justify-end gap-1">
                                                 {(item.change || 0) >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
                                                 {item.change ? `${item.change.toFixed(2)}%` : '0.00%'}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-5">
+                                        <td className="px-4 md:px-6 py-4 md:py-5">
                                             <div className="flex justify-center">
                                                 <WatchlistButton
                                                     symbol={item.symbol}

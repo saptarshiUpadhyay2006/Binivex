@@ -1,6 +1,8 @@
 import React from 'react';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import TutorialModal from "@/components/TutorialModal";
+import AIChat from "@/components/AIChat";
 import { headers } from 'next/headers';
 import { getAuth } from '@/lib/better-auth/auth';
 import { redirect } from 'next/navigation';
@@ -26,6 +28,8 @@ const Layout =async ({children}:{children:React.ReactNode}) => {
             {children}
         </main>
         <Footer />
+        <TutorialModal />
+        <AIChat />
     </div>
   )
 }

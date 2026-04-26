@@ -51,12 +51,18 @@ export default async function StockDetails({ params }: StockDetailsPageProps) {
 
         {/* Right column */}
         <div className="flex flex-col gap-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
              <WatchlistButton 
                symbol={symbol.toUpperCase()} 
                company={symbol.toUpperCase()} 
                isInWatchlist={isInWatchlist} 
              />
+             <Link href={`/analyze?symbol=${symbol.toUpperCase()}`} className="flex-1">
+                <Button className="w-full bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold h-11 rounded flex items-center gap-2">
+                   <Sparkles size={16} className="text-yellow-500" />
+                   Analyze with AI
+                </Button>
+             </Link>
           </div>
 
           <TradingViewWidget

@@ -13,7 +13,7 @@ const Footer = () => {
             Binivex <span className="text-yellow-500 text-[10px] uppercase ml-1 tracking-widest">Intelligence</span>
           </p>
           <p className="text-[10px] text-gray-500 font-medium flex items-center gap-1">
-            Made with <Heart size={10} className="fill-red-500 text-red-500" /> by Saptarshi Upadhyay
+            Made by <b>Saptarshi Upadhyay</b>
           </p>
         </div>
 
@@ -49,7 +49,7 @@ const Footer = () => {
           </Link>
         </div>
 
-        <div className="text-[10px] text-gray-600 font-medium tracking-widest uppercase">
+        <div className="text-[10px] text-gray-300 font-medium tracking-widest uppercase">
           &copy; {currentYear} Binivex Platform
         </div>
       </div>

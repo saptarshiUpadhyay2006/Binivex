@@ -1,11 +1,24 @@
+"use client";
 import TradingViewWidget from "@/components/TradingViewWidget";
 import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation";
 import { MARKET_DATA_WIDGET_CONFIG, TOP_STORIES_WIDGET_CONFIG } from "@/lib/constants";
 import StatCard from "@/components/StatCard";
 import { TrendingUp, Activity, BarChart3, Globe, Shield, Zap, LayoutDashboard, Search, Box, Code } from "lucide-react";
+import { useUI } from "@/context/UIContext";
+import AdvantageCard from "@/components/AdvantageCard";
 
 const Home = () => {
+  const { openSearch, openTutorial } = useUI();
+  const router = useRouter();
   const scriptUrl=`https://s3.tradingview.com/external-embedding/embed-widget-`;
+
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
   
   return (
     <div className="home-wrapper">
@@ -24,10 +37,17 @@ const Home = () => {
             Experience a full-stack real-time stock tracking platform designed for elite decision-making. Monitor global markets with live data, interactive charts, and AI-powered insights.
           </p>
           <div className="flex items-center gap-4 mt-2">
-            <Button className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-6 py-2 rounded-xl transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(234,179,8,0.2)]">
+            <Button 
+              onClick={openSearch}
+              className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-6 py-2 rounded-xl transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(234,179,8,0.2)]"
+            >
                 Get Started
             </Button>
-            <Button variant="outline" className="border-white/10 text-white hover:bg-white/5 font-bold px-6 py-2 rounded-xl transition-all">
+            <Button 
+              variant="outline" 
+              onClick={openTutorial}
+              className="border-white/10 text-white hover:bg-white/5 font-bold px-6 py-2 rounded-xl transition-all"
+            >
                 View Tutorial
             </Button>
           </div>
@@ -35,7 +55,7 @@ const Home = () => {
       </section>
 
       {/* Professional Header Section */}
-      <header className="flex flex-col gap-1 mb-8 border-b border-white/5 pb-6">
+      <header id="market-data" className="flex flex-col gap-1 mb-8 border-b border-white/5 pb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight flex items-center gap-3">
             <TrendingUp className="text-yellow-500" size={24} />
             Market Intelligence
@@ -131,42 +151,38 @@ const Home = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div className="flex flex-col gap-4 p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-yellow-500/20 transition-all duration-300 group">
-            <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center text-yellow-500 group-hover:scale-110 transition-transform">
-              <Zap size={24} />
-            </div>
-            <h3 className="font-bold text-white text-lg">Real-Time Data</h3>
-            <p className="text-sm text-gray-500 leading-relaxed">Lightning-fast price updates and global market indices at your fingertips.</p>
-          </div>
+          <AdvantageCard 
+            icon={Zap} 
+            title="Real-Time Data" 
+            description="Lightning-fast price updates and global market indices at your fingertips."
+            onClick={() => scrollToSection('market-data')}
+          />
 
-          <div className="flex flex-col gap-4 p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-yellow-500/20 transition-all duration-300 group">
-            <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center text-yellow-500 group-hover:scale-110 transition-transform">
-              <Search size={24} />
-            </div>
-            <h3 className="font-bold text-white text-lg">Smart Search</h3>
-            <p className="text-sm text-gray-500 leading-relaxed">Search thousands of global symbols and instantly find detailed market intelligence.</p>
-          </div>
+          <AdvantageCard 
+            icon={Search} 
+            title="Smart Search" 
+            description="Search thousands of global symbols and instantly find detailed market intelligence."
+            onClick={openSearch}
+          />
 
-          <div className="flex flex-col gap-4 p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-yellow-500/20 transition-all duration-300 group">
-            <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center text-yellow-500 group-hover:scale-110 transition-transform">
-              <LayoutDashboard size={24} />
-            </div>
-            <h3 className="font-bold text-white text-lg">Watchlist Tracking</h3>
-            <p className="text-sm text-gray-500 leading-relaxed">Monitor your favorite assets in one place with our custom-built tracking system.</p>
-          </div>
+          <AdvantageCard 
+            icon={LayoutDashboard} 
+            title="Watchlist Tracking" 
+            description="Monitor your favorite assets in one place with our custom-built tracking system."
+            onClick={() => router.push('/watchlist')}
+          />
 
-          <div className="flex flex-col gap-4 p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-yellow-500/20 transition-all duration-300 group">
-            <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center text-yellow-500 group-hover:scale-110 transition-transform">
-              <Globe size={24} />
-            </div>
-            <h3 className="font-bold text-white text-lg">Global News</h3>
-            <p className="text-sm text-gray-500 leading-relaxed">Curated financial news from around the world to keep you ahead of the market.</p>
-          </div>
+          <AdvantageCard 
+            icon={Globe} 
+            title="Global News" 
+            description="Curated financial news from around the world to keep you ahead of the market."
+            onClick={() => scrollToSection('news-section')}
+          />
         </div>
       </section>
 
       {/* Secondary Data Section */}
-      <section className="grid grid-cols-1 xl:grid-cols-3 gap-8 mt-4">
+      <section id="news-section" className="grid grid-cols-1 xl:grid-cols-3 gap-8 mt-4">
         <div className="xl:col-span-1 flex flex-col gap-5">
             <div className="flex flex-col gap-1">
                 <h2 className="section-title mb-0">

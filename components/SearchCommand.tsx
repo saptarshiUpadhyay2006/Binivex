@@ -8,8 +8,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {searchStocks} from "@/lib/actions/finnhub.actions";
 import {useDebounce} from "@/hooks/useDebounce";
-export default function SearchCommand({ renderAs = 'button', label = 'Add stock', initialStocks, watchlistSymbols = [] }: SearchCommandProps) {
-  const [open, setOpen] = useState(false)
+import { useUI } from "@/context/UIContext";
+import { cn } from "@/lib/utils";
+export default function SearchCommand({ renderAs = 'button', label = 'Add stock', initialStocks, watchlistSymbols = [], className }: SearchCommandProps) {
+  const { isSearchOpen, setIsSearchOpen } = useUI();
   const [searchTerm, setSearchTerm] = useState("")
   const [loading, setLoading] = useState(false)
   const [stocks, setStocks] = useState<StockWithWatchlistStatus[]>(initialStocks);
@@ -26,7 +28,7 @@ export default function SearchCommand({ renderAs = 'button', label = 'Add stock'
     const onKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault()
-        setOpen(v => !v)
+        setIsSearchOpen(!isSearchOpen)
       }
     }
     window.addEventListener("keydown", onKeyDown)
@@ -54,7 +56,7 @@ export default function SearchCommand({ renderAs = 'button', label = 'Add stock'
   }, [searchTerm]);
 
   const handleSelectStock = () => {
-    setOpen(false);
+    setIsSearchOpen(false);
     setSearchTerm("");
     setStocks(initialStocks);
   }
@@ -62,17 +64,17 @@ export default function SearchCommand({ renderAs = 'button', label = 'Add stock'
   return (
     <>
       {renderAs === 'text' ? (
-          <span onClick={() => setOpen(true)} className="search-text">
+          <span onClick={() => setIsSearchOpen(true)} className={cn("search-text", className)}>
             {label}
           </span>
       ): (
-          <Button onClick={() => setOpen(true)} className="search-btn">
+          <Button onClick={() => setIsSearchOpen(true)} className={cn("search-btn", className)}>
             {label}
           </Button>
       )}
       <CommandDialog 
-        open={open} 
-        onOpenChange={setOpen} 
+        open={isSearchOpen} 
+        onOpenChange={setIsSearchOpen} 
         className="search-dialog"
         shouldFilter={false}
       >
