@@ -1108,3 +1108,38 @@ export const INACTIVE_USER_REMINDER_EMAIL_TEMPLATE = `<!DOCTYPE html>
     </table>
 </body>
 </html>`;
+
+export const LOGIN_ALERT_EMAIL_TEMPLATE = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Detected - Binivex</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #050505; font-family: sans-serif;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #050505;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; background-color: #141414; border-radius: 8px; border: 1px solid #30333A; padding: 40px;">
+                    <tr>
+                        <td align="center">
+                            <h1 style="color: #FDD458; font-size: 24px; margin-bottom: 20px;">New Login Detected</h1>
+                            <p style="color: #CCDADC; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
+                                Hello {{name}}, a new login was detected on your Binivex account.
+                            </p>
+                            <div style="background-color: #212328; border-radius: 8px; padding: 20px; text-align: left; margin-bottom: 30px;">
+                                <p style="color: #9ca3af; font-size: 14px; margin: 0 0 10px 0;"><strong>Time:</strong> {{timestamp}}</p>
+                                <p style="color: #9ca3af; font-size: 14px; margin: 0 0 10px 0;"><strong>User:</strong> {{email}}</p>
+                            </div>
+                            <p style="color: #6b7280; font-size: 14px; margin-bottom: 30px;">
+                                If this was you, you can safely ignore this email. If you don't recognize this activity, please secure your account immediately.
+                            </p>
+                            <a href="https://binivex.vercel.app" style="display: inline-block; background-color: #FDD458; color: #000000; text-decoration: none; padding: 12px 24px; border-radius: 4px; font-weight: bold;">Go to Binivex</a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;

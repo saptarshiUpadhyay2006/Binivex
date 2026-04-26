@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { WELCOME_EMAIL_TEMPLATE,NEWS_SUMMARY_EMAIL_TEMPLATE } from './templates';
+import { WELCOME_EMAIL_TEMPLATE, NEWS_SUMMARY_EMAIL_TEMPLATE, LOGIN_ALERT_EMAIL_TEMPLATE } from './templates';
 
 export const transporter=nodemailer.createTransport(
     {
@@ -26,7 +26,24 @@ export const sendWelcomeEmail = async ({ email, name, intro }: WelcomeEmailData)
     }
 
     await transporter.sendMail(mailOptions);
-}
+};
+
+export const sendLoginAlertEmail = async ({ email, name, timestamp }: { email: string; name: string; timestamp: string }) => {
+    const htmlTemplate = LOGIN_ALERT_EMAIL_TEMPLATE
+        .replace('{{name}}', name)
+        .replace('{{email}}', email)
+        .replace('{{timestamp}}', timestamp);
+
+    const mailOptions = {
+        from: `"Binivex Security" <Binivex@email.pro>`,
+        to: email,
+        subject: `Security Alert: New Login Detected`,
+        text: `A new login was detected on your Binivex account.`,
+        html: htmlTemplate,
+    };
+
+    await transporter.sendMail(mailOptions);
+};
 
 export const sendNewsSummaryEmail = async (
     { email, date, newsContent }: { email: string; date: string; newsContent: string }

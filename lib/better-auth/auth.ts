@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { connectToDatabase } from "@/database/mongoose";
+import { inngest } from "@/lib/inngest/client";
 import { nextCookies } from "better-auth/next-js";
 
 // 1. Wrap the initialization in a factory function to capture strict types
@@ -28,6 +29,45 @@ const createAuth = (db: any) => {
             },
         },
         plugins: [nextCookies()],
+        databaseHooks: {
+            user: {
+                create: {
+                    after: async (user) => {
+                        await inngest.send({
+                            name: 'app/user.created',
+                            data: {
+                                email: user.email,
+                                name: user.name,
+                                // These might be undefined for social logins, handled in Inngest function
+                                country: (user as any).country,
+                                investmentGoals: (user as any).investmentGoals,
+                                riskTolerance: (user as any).riskTolerance,
+                                preferredIndustry: (user as any).preferredIndustry
+                            }
+                        });
+                    }
+                }
+            },
+            session: {
+                create: {
+                    after: async (session) => {
+                        // Get the user to get their name
+                        const mongoose = await connectToDatabase();
+                        const db = mongoose.connection.db;
+                        const user = await db?.collection('user').findOne({ id: session.userId });
+                        
+                        await inngest.send({
+                            name: 'app/user.logged-in',
+                            data: {
+                                email: user?.email,
+                                name: user?.name,
+                                timestamp: new Date().toLocaleString()
+                            }
+                        });
+                    }
+                }
+            }
+        }
     });
 };
 

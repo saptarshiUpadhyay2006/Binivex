@@ -1,6 +1,6 @@
 import {inngest} from "@/lib/inngest/client";
 import {NEWS_SUMMARY_EMAIL_PROMPT, PERSONALIZED_WELCOME_EMAIL_PROMPT} from "@/lib/inngest/prompts";
-import {sendNewsSummaryEmail, sendWelcomeEmail} from "@/lib/nodemailer";
+import {sendNewsSummaryEmail, sendWelcomeEmail, sendLoginAlertEmail} from "@/lib/nodemailer";
 import {getAllUsersForNewsEmail} from "@/lib/actions/user.actions";
 import { getWatchlistSymbolsByEmail } from "@/lib/actions/watchlist.actions";
 import { getNews } from "@/lib/actions/finnhub.actions";
@@ -13,10 +13,10 @@ export const sendSignUpEmail = inngest.createFunction(
 },
     async ({ event, step }) => {
         const userProfile = `
-            - Country: ${event.data.country}
-            - Investment goals: ${event.data.investmentGoals}
-            - Risk tolerance: ${event.data.riskTolerance}
-            - Preferred industry: ${event.data.preferredIndustry}
+            - Country: ${event.data.country || 'Not provided'}
+            - Investment goals: ${event.data.investmentGoals || 'Not provided'}
+            - Risk tolerance: ${event.data.riskTolerance || 'Not provided'}
+            - Preferred industry: ${event.data.preferredIndustry || 'Not provided'}
         `
 
         const prompt = PERSONALIZED_WELCOME_EMAIL_PROMPT.replace('{{userProfile}}', userProfile)
@@ -39,13 +39,33 @@ export const sendSignUpEmail = inngest.createFunction(
 
             const { data: { email, name } } = event;
 
-            return await sendWelcomeEmail({ email, name, intro: introText });
+            return await sendWelcomeEmail({ email, name: name || 'Valued User', intro: introText });
         })
 
         return {
             success: true,
             message: 'Welcome email sent successfully'
         }
+    }
+)
+
+export const sendLoginAlert = inngest.createFunction(
+    { 
+        id: 'login-alert-email',
+        triggers: [{ event: 'app/user.logged-in' }] 
+    },
+    async ({ event, step }) => {
+        const { data: { email, name, timestamp } } = event;
+
+        await step.run('send-login-email', async () => {
+            return await sendLoginAlertEmail({ 
+                email, 
+                name: name || 'Valued User', 
+                timestamp 
+            });
+        });
+
+        return { success: true, message: 'Login alert email sent' };
     }
 )
 
