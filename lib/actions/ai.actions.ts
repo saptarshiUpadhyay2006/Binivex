@@ -99,3 +99,114 @@ export async function analyzeStock(params: {
     return { success: false, error: error.message || "Failed to analyze stock" };
   }
 }
+
+export async function summarizeEarnings(params: {
+  symbol: string;
+  earningsData: EarningsCalendarEvent[];
+}) {
+  const { symbol, earningsData } = params;
+
+  try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) return { success: false, error: "GEMINI_API_KEY is not defined" };
+
+    const recentEarnings = earningsData
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 4);
+
+    const context = recentEarnings
+      .map(e => `- ${e.date}: EPS Est: ${e.epsEstimate}, EPS Act: ${e.epsActual}, Rev Est: ${e.revenueEstimate}, Rev Act: ${e.revenueActual}`)
+      .join("\n");
+
+    const prompt = `
+      As Binivex AI, provide a concise summary of the earnings performance and expectations for ${symbol}.
+      
+      Historical & Upcoming Data:
+      ${context}
+
+      Based on this data:
+      1. What is the overall trend in earnings (beating or missing estimates)?
+      2. If there is an upcoming date, what is the market expectation?
+      3. Provide a 1-sentence "Intelligence Outlook" for the next earnings cycle.
+
+      Keep it under 150 words. Professional and concise.
+    `;
+
+    console.log(`Summarizing earnings for ${symbol}...`);
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+
+    return { success: true, content: text };
+  } catch (error: any) {
+    console.error("Earnings Summary Error:", error);
+    return { success: false, error: error.message || "Failed to summarize earnings" };
+  }
+}
+
+export async function summarizeNewsArticle(params: {
+  headline: string;
+  summary: string;
+}) {
+  const { headline, summary } = params;
+
+  try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) return { success: false, error: "GEMINI_API_KEY is not defined" };
+
+    const prompt = `
+      As Binivex AI, provide a very concise "Intelligence TL;DR" for this news story.
+      
+      Headline: ${headline}
+      Summary: ${summary}
+
+      Requirements:
+      - Max 2 sentences.
+      - Focus on the market impact.
+      - Professional and elite tone.
+    `;
+
+    console.log(`Summarizing news article: ${headline.slice(0, 30)}...`);
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+
+    return { success: true, content: text };
+  } catch (error: any) {
+    console.error("News Summary Error:", error);
+    return { success: false, error: error.message || "Failed to summarize article" };
+  }
+}
+export async function explainEconomicImpact(params: {
+  event: string;
+  impact: string;
+}) {
+  const { event, impact } = params;
+
+  try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) return { success: false, error: "GEMINI_API_KEY is not defined" };
+
+    const prompt = `
+      As Binivex AI, explain "Why it matters" for this economic event in the context of the stock market.
+      
+      Event: ${event}
+      Finnhub Reported Impact: ${impact}
+
+      Requirements:
+      - Max 3 sentences.
+      - Explain the mechanism of how this affects markets (e.g., interest rates, consumer spending, volatility).
+      - Professional, elite, and educational tone.
+    `;
+
+    console.log(`Explaining economic impact: ${event}...`);
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+
+    return { success: true, content: text };
+  } catch (error: any) {
+    console.error("Economic Explanation Error:", error);
+    return { success: false, error: error.message || "Failed to explain impact" };
+  }
+}

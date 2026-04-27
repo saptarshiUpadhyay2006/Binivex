@@ -1,72 +1,82 @@
-"use client";
 import TradingViewWidget from "@/components/TradingViewWidget";
-import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation";
-import { MARKET_DATA_WIDGET_CONFIG, TOP_STORIES_WIDGET_CONFIG } from "@/lib/constants";
+import { MARKET_DATA_WIDGET_CONFIG } from "@/lib/constants";
 import StatCard from "@/components/StatCard";
-import { TrendingUp, Activity, BarChart3, Globe, Shield, Zap, LayoutDashboard, Search, Box, Code } from "lucide-react";
-import { useUI } from "@/context/UIContext";
-import AdvantageCard from "@/components/AdvantageCard";
+import { TrendingUp, Activity, BarChart3, Globe, Shield, Zap, Box, Code } from "lucide-react";
+import { getMarketMovers, getNews, getEconomicCalendar } from "@/lib/actions/finnhub.actions";
+import MarketMovers from "@/components/MarketMovers";
+import NewsFeed from "@/components/NewsFeed";
+import HomeHero from "@/components/HomeHero";
+import AdvantageSection from "@/components/AdvantageSection";
+import EconomicCalendar from "@/components/EconomicCalendar";
 
-const Home = () => {
-  const { openSearch, openTutorial } = useUI();
-  const router = useRouter();
-  const scriptUrl=`https://s3.tradingview.com/external-embedding/embed-widget-`;
 
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+export default async function Home() {
+  const scriptUrl = `https://s3.tradingview.com/external-embedding/embed-widget-`;
+
+  // Parallel fetch of movers, news, and economic calendar
+  const [movers, newsArticles, economicEvents] = await Promise.all([
+    getMarketMovers(),
+    getNews(),
+    getEconomicCalendar()
+  ]);
+
+  // Limit to 3 news articles as requested
+  const limitedNews = newsArticles.slice(0, 3);
   
+  // Limit to 3 gainers/losers as requested
+  const limitedMovers = {
+    gainers: movers.gainers.slice(0, 3),
+    losers: movers.losers.slice(0, 3)
+  };
+
   return (
     <div className="home-wrapper">
-      {/* Welcome Hero Section */}
-      <section className="mb-10 p-8 rounded-3xl bg-gradient-to-br from-yellow-500/10 via-yellow-500/[0.02] to-transparent border border-yellow-500/10 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/5 blur-[100px] -mr-32 -mt-32 rounded-full" />
-        <div className="relative z-10 flex flex-col gap-4">
-          <div className="flex items-center gap-2 text-yellow-500 font-bold uppercase tracking-[0.2em] text-[10px]">
-            <Zap size={14} />
-            Next-Gen Fintech
-          </div>
-          <h1 className="text-3xl md:text-5xl font-bold text-white tracking-tight leading-tight max-w-3xl">
-            Welcome to <span className="text-yellow-500">Binivex</span>. Your Premium Intelligence Partner.
-          </h1>
-          <p className="text-gray-400 text-sm md:text-base max-w-2xl leading-relaxed">
-            Experience a full-stack real-time stock tracking platform designed for elite decision-making. Monitor global markets with live data, interactive charts, and AI-powered insights.
-          </p>
-          <div className="flex items-center gap-4 mt-2">
-            <Button 
-              onClick={openSearch}
-              className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-6 py-2 rounded-xl transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(234,179,8,0.2)]"
-            >
-                Get Started
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={openTutorial}
-              className="border-white/10 text-white hover:bg-white/5 font-bold px-6 py-2 rounded-xl transition-all"
-            >
-                View Tutorial
-            </Button>
-          </div>
+      {/* Welcome Hero Section (Client Component for search/tutorial interactions) */}
+      <HomeHero />
+
+      {/* Professional Header Section */}
+      <header id="market-data" className="flex flex-col gap-2 mb-10 border-b border-white/5 pb-8 relative">
+        <div className="absolute -left-10 top-0 w-20 h-20 bg-yellow-500/5 blur-3xl rounded-full" />
+        <h1 className="text-2xl md:text-4xl font-black text-white tracking-tighter flex items-center gap-4">
+            <TrendingUp className="text-yellow-500" size={32} />
+            Market Intelligence
+        </h1>
+        <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <p className="text-gray-500 text-[10px] md:text-xs font-black uppercase tracking-[0.4em]">
+                Live Institutional Data • {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            </p>
+        </div>
+      </header>
+
+      {/* Market Flow - Large, Complete Section (Now above Market Movers) */}
+      <section id="market-flow-section" className="flex flex-col gap-8 w-full mb-20 scroll-mt-20">
+        <div className="flex items-center justify-between border-b border-white/5 pb-8">
+            <div className="flex flex-col gap-2">
+                <h2 className="text-sm font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
+                    <div className="p-1.5 rounded-lg bg-yellow-500/10">
+                        <BarChart3 className="text-yellow-500" size={18} />
+                    </div>
+                    Market Flow Analysis
+                </h2>
+                <p className="text-[10px] text-gray-600 font-black uppercase tracking-[0.4em]">Global performance & asset flow monitoring</p>
+            </div>
+        </div>
+        
+        <div className="dashboard-card h-[700px] w-full">
+            <TradingViewWidget
+                scriptUrl={`${scriptUrl}market-overview.js`}
+                config={MARKET_DATA_WIDGET_CONFIG}
+                height={700}
+            />
         </div>
       </section>
 
-      {/* Professional Header Section */}
-      <header id="market-data" className="flex flex-col gap-1 mb-8 border-b border-white/5 pb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight flex items-center gap-3">
-            <TrendingUp className="text-yellow-500" size={24} />
-            Market Intelligence
-        </h1>
-        <p className="text-gray-500 text-xs md:text-sm max-w-2xl font-medium uppercase tracking-widest">
-            Real-time global market performance • {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-        </p>
-      </header>
+      {/* Market Movers Section (Gainers/Losers) - Restricted to 3 each, below Market Flow */}
+      <MarketMovers gainers={limitedMovers.gainers} losers={limitedMovers.losers} />
 
       {/* Quick Stats Row */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 my-12">
         <StatCard 
             title="S&P 500" 
             value="5,137.08" 
@@ -101,169 +111,96 @@ const Home = () => {
         />
       </section>
 
-      {/* Main Analysis Section */}
-      <section className="flex flex-col gap-6 mt-6">
-        <div className="flex items-center justify-between border-b border-white/5 pb-2">
-            <div className="flex flex-col gap-1">
-                <h2 className="section-title mb-0">
-                    <BarChart3 className="text-yellow-500" size={20} />
-                    Market Overview
-                </h2>
-                <p className="text-xs text-gray-500 ml-9">Real-time performance of global indices and major assets</p>
-            </div>
-            <Button variant="ghost" className="text-yellow-500 hover:text-yellow-400 hover:bg-yellow-500/5 text-xs font-bold uppercase tracking-widest">
-                Analytics Details
-            </Button>
-        </div>
-        
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8">
-            <div className="xl:col-span-2 dashboard-card h-[600px]">
-                <TradingViewWidget
-                    scriptUrl={`${scriptUrl}market-overview.js`}
-                    config={MARKET_DATA_WIDGET_CONFIG}
-                    height={600}
-                />
-            </div>
-            <div className="flex flex-col gap-4">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                    <Globe size={14} />
-                    Top Stories
-                </h3>
-                <div className="dashboard-card flex-1">
-                    <TradingViewWidget
-                        scriptUrl={`${scriptUrl}timeline.js`}
-                        config={TOP_STORIES_WIDGET_CONFIG}
-                        height={550}
-                    />
-                </div>
-            </div>
-        </div>
+      {/* Economic Calendar - Macro Pulse (Between Stats and Secondary Widgets) */}
+      <EconomicCalendar events={economicEvents} />
+
+      {/* Secondary Widgets Section - Moved before News Feed */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
+           <div className="flex flex-col gap-6">
+              <div className="flex items-center justify-between border-b border-white/5 pb-6">
+                  <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] flex items-center gap-3">
+                      <div className="p-1.5 rounded-lg bg-yellow-500/10">
+                        <Activity size={14} className="text-yellow-500" />
+                      </div>
+                      Sector Heatmap
+                  </h4>
+                  <span className="text-[9px] font-black text-gray-700 uppercase tracking-widest">Visual Distribution</span>
+              </div>
+              <div className="dashboard-card h-[400px]">
+                  <TradingViewWidget
+                      scriptUrl={`${scriptUrl}stock-heatmap.js`}
+                      config={MARKET_DATA_WIDGET_CONFIG}
+                      height={400}
+                  />
+              </div>
+           </div>
+           <div className="flex flex-col gap-6">
+              <div className="flex items-center justify-between border-b border-white/5 pb-6">
+                  <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] flex items-center gap-3">
+                      <div className="p-1.5 rounded-lg bg-yellow-500/10">
+                        <TrendingUp size={14} className="text-yellow-500" />
+                      </div>
+                      Live Market Quotes
+                  </h4>
+                  <span className="text-[9px] font-black text-gray-700 uppercase tracking-widest">Real-Time Execution</span>
+              </div>
+              <div className="dashboard-card h-[400px]">
+                  <TradingViewWidget
+                      scriptUrl={`${scriptUrl}market-quotes.js`}
+                      config={MARKET_DATA_WIDGET_CONFIG}
+                      height={400}
+                  />
+              </div>
+           </div>
       </section>
 
-      {/* What Binivex Does Section */}
-      <section className="mt-12 py-12 border-y border-white/5 bg-gradient-to-r from-yellow-500/[0.02] to-transparent rounded-3xl px-6 md:px-10">
-        <div className="flex flex-col gap-2 mb-10 text-center md:text-left">
-          <h2 className="text-xl md:text-2xl font-bold text-white flex items-center justify-center md:justify-start gap-3">
-            <Shield className="text-yellow-500" size={24} />
-            The Binivex Advantage
-          </h2>
-          <p className="text-sm text-gray-500 font-medium">Precision tools for the modern market intelligence</p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          <AdvantageCard 
-            icon={Zap} 
-            title="Real-Time Data" 
-            description="Lightning-fast price updates and global market indices at your fingertips."
-            onClick={() => scrollToSection('market-data')}
-          />
-
-          <AdvantageCard 
-            icon={Search} 
-            title="Smart Search" 
-            description="Search thousands of global symbols and instantly find detailed market intelligence."
-            onClick={openSearch}
-          />
-
-          <AdvantageCard 
-            icon={LayoutDashboard} 
-            title="Watchlist Tracking" 
-            description="Monitor your favorite assets in one place with our custom-built tracking system."
-            onClick={() => router.push('/watchlist')}
-          />
-
-          <AdvantageCard 
-            icon={Globe} 
-            title="Global News" 
-            description="Curated financial news from around the world to keep you ahead of the market."
-            onClick={() => scrollToSection('news-section')}
-          />
-        </div>
+      {/* News Feed - Below Secondary Widgets, Restricted to 3 */}
+      <section className="w-full max-w-5xl mx-auto mb-16">
+           <div id="news-feed-header" className="mb-4 invisible" />
+           <NewsFeed articles={limitedNews} />
       </section>
 
-      {/* Secondary Data Section */}
-      <section id="news-section" className="grid grid-cols-1 xl:grid-cols-3 gap-8 mt-4">
-        <div className="xl:col-span-1 flex flex-col gap-5">
-            <div className="flex flex-col gap-1">
-                <h2 className="section-title mb-0">
-                    <Activity className="text-yellow-500" size={20} />
-                    Stock Heatmap
-                </h2>
-                <p className="text-xs text-gray-500 ml-9">Visual breakdown of market sector performance</p>
-            </div>
-            <div className="dashboard-card h-[500px]">
-                <TradingViewWidget
-                    scriptUrl={`${scriptUrl}stock-heatmap.js`}
-                    config={MARKET_DATA_WIDGET_CONFIG}
-                    height={500}
-                />
-            </div>
-        </div>
-        <div className="xl:col-span-2 flex flex-col gap-5">
-            <div className="flex flex-col gap-1">
-                <h2 className="section-title mb-0">
-                    <TrendingUp className="text-yellow-500" size={20} />
-                    Quote Summary
-                </h2>
-                <p className="text-xs text-gray-500 ml-9">Instant price checks and volume analysis for active symbols</p>
-            </div>
-            <div className="dashboard-card h-[500px]">
-                <TradingViewWidget
-                    scriptUrl={`${scriptUrl}market-quotes.js`}
-                    config={MARKET_DATA_WIDGET_CONFIG}
-                    height={500}
-                />
-            </div>
-        </div>
-      </section>
+      {/* Advantage Section (Client Component) */}
+      <AdvantageSection />
 
-      {/* Powered By Section */}
-      <section className="mt-16 py-12 text-center flex flex-col gap-8">
-        <div className="flex flex-col gap-2">
-            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-[0.3em] flex items-center justify-center gap-2">
+      {/* Footer Branding */}
+      <section className="mt-24 py-16 text-center flex flex-col gap-10 border-t border-white/5">
+        <div className="flex flex-col gap-3">
+            <h3 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.4em] flex items-center justify-center gap-2">
                 <Box size={14} />
-                Architecture
+                Core Stack
             </h3>
-            <h2 className="text-2xl font-bold text-white">Powered by the Modern Web</h2>
+            <h2 className="text-3xl font-black text-white tracking-tight">Built for Performance</h2>
         </div>
         
-        <div className="flex flex-wrap items-center justify-center gap-6 md:gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-700">
-            <div className="flex items-center gap-3 group transition-all">
-                <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-blue-500/10 transition-colors">
-                    <Code className="text-blue-400" size={20} />
+        <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16 opacity-30 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-1000">
+            <div className="flex items-center gap-4 group">
+                <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-blue-500/10 transition-colors">
+                    <Code className="text-blue-400" size={24} />
                 </div>
-                <span className="text-gray-400 font-bold group-hover:text-white transition-colors tracking-tight">Next.js</span>
+                <span className="text-gray-400 font-black group-hover:text-white transition-colors uppercase tracking-widest text-xs">Next.js</span>
             </div>
-            <div className="flex items-center gap-3 group transition-all">
-                <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-purple-500/10 transition-colors">
-                    <Shield className="text-purple-400" size={20} />
+            <div className="flex items-center gap-4 group">
+                <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-purple-500/10 transition-colors">
+                    <Shield className="text-purple-400" size={24} />
                 </div>
-                <span className="text-gray-400 font-bold group-hover:text-white transition-colors tracking-tight">Better Auth</span>
+                <span className="text-gray-400 font-black group-hover:text-white transition-colors uppercase tracking-widest text-xs">Better Auth</span>
             </div>
-            <div className="flex items-center gap-3 group transition-all">
-                <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-emerald-500/10 transition-colors">
-                    <Zap className="text-emerald-400" size={20} />
+            <div className="flex items-center gap-4 group">
+                <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-emerald-500/10 transition-colors">
+                    <Zap className="text-emerald-400" size={24} />
                 </div>
-                <span className="text-gray-400 font-bold group-hover:text-white transition-colors tracking-tight">Inngest</span>
-            </div>
-            <div className="flex items-center gap-3 group transition-all">
-                <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-blue-600/10 transition-colors">
-                    <TrendingUp className="text-blue-600" size={20} />
-                </div>
-                <span className="text-gray-400 font-bold group-hover:text-white transition-colors tracking-tight">TypeScript</span>
+                <span className="text-gray-400 font-black group-hover:text-white transition-colors uppercase tracking-widest text-xs">Inngest</span>
             </div>
         </div>
 
-        <div className="max-w-3xl mx-auto mt-6">
-            <p className="text-sm text-gray-500 leading-loose">
+        <div className="max-w-3xl mx-auto mt-8">
+            <p className="text-xs text-gray-600 leading-loose font-medium px-6">
                 Binivex leverages Inngest-based background workflows for automated data updates, alerting, and event-driven processing, 
                 ensuring your market intelligence is always fresh and your decisions are powered by the latest available information.
             </p>
         </div>
       </section>
-
     </div>
   )
 }
-
-export default Home;

@@ -216,6 +216,66 @@ declare global {
         threshold: number;
         changePercent?: number;
     };
+
+    type RecommendationTrend = {
+        buy: number;
+        hold: number;
+        period: string;
+        sell: number;
+        strongBuy: number;
+        strongSell: number;
+        symbol: string;
+    };
+
+    type EarningsCalendarEvent = {
+        date: string;
+        epsActual: number | null;
+        epsEstimate: number | null;
+        hour: string;
+        quarter: number;
+        revenueActual: number | null;
+        revenueEstimate: number | null;
+        symbol: string;
+        year: number;
+    };
+
+    type BasicFinancials = {
+        symbol: string;
+        metricType: string;
+        series: any;
+        metric: {
+            '10DayAverageTradingVolume'?: number;
+            '52WeekHigh'?: number;
+            '52WeekLow'?: number;
+            '52WeekLowDate'?: string;
+            '52WeekPriceReturnDaily'?: number;
+            'beta'?: number;
+            'epsExclExtraItemsAnnual'?: number;
+            'epsExclExtraItemsTTM'?: number;
+            'epsGrowthQuarterlyYoy'?: number;
+            'epsGrowthTTMYoy'?: number;
+            'peExclExtraItemsTTM'?: number;
+            'peAnnual'?: number;
+            'psTTM'?: number;
+            'dividendYieldIndicatedAnnual'?: number;
+            'netProfitMarginAnnual'?: number;
+            'netProfitMarginTTM'?: number;
+            'revenueGrowthQuarterlyYoy'?: number;
+            'revenueGrowthTTMYoy'?: number;
+            'roeTTM'?: number;
+            'marketCapitalization'?: number;
+        };
+    };
+    type EconomicEvent = {
+        actual: number | null;
+        country: string;
+        estimate: number | null;
+        event: string;
+        impact: 'low' | 'medium' | 'high' | string;
+        prev: number | null;
+        time: string;
+        unit: string;
+    };
 }
 
 export {};

@@ -194,3 +194,106 @@ export const getQuote = cache(async (symbol: string): Promise<QuoteData> => {
     return {};
   }
 });
+
+export const getBasicFinancials = cache(async (symbol: string): Promise<BasicFinancials | null> => {
+  try {
+    const token = process.env.FINNHUB_API_KEY ?? NEXT_PUBLIC_FINNHUB_API_KEY;
+    if (!token) return null;
+
+    const url = `${FINNHUB_BASE_URL}/stock/metric?symbol=${encodeURIComponent(symbol)}&metric=all&token=${token}`;
+    return await fetchJSON<BasicFinancials>(url, 3600);
+  } catch (err) {
+    console.error('getBasicFinancials error:', err);
+    return null;
+  }
+});
+
+export const getRecommendationTrends = cache(async (symbol: string): Promise<RecommendationTrend[]> => {
+  try {
+    const token = process.env.FINNHUB_API_KEY ?? NEXT_PUBLIC_FINNHUB_API_KEY;
+    if (!token) return [];
+
+    const url = `${FINNHUB_BASE_URL}/stock/recommendation?symbol=${encodeURIComponent(symbol)}&token=${token}`;
+    return await fetchJSON<RecommendationTrend[]>(url, 3600);
+  } catch (err) {
+    console.error('getRecommendationTrends error:', err);
+    return [];
+  }
+});
+
+export const getEarningsCalendar = cache(async (symbol: string): Promise<EarningsCalendarEvent[]> => {
+  try {
+    const token = process.env.FINNHUB_API_KEY ?? NEXT_PUBLIC_FINNHUB_API_KEY;
+    if (!token) return [];
+
+    const range = getDateRange(365); // Look back and forward 1 year
+    const url = `${FINNHUB_BASE_URL}/calendar/earnings?from=${range.from}&to=${range.to}&symbol=${encodeURIComponent(symbol)}&token=${token}`;
+    const data = await fetchJSON<{ earningsCalendar: EarningsCalendarEvent[] }>(url, 3600);
+    return data.earningsCalendar || [];
+  } catch (err) {
+    console.error('getEarningsCalendar error:', err);
+    return [];
+  }
+});
+
+export const getMarketMovers = cache(async (): Promise<{ gainers: any[], losers: any[] }> => {
+  try {
+    const token = process.env.FINNHUB_API_KEY ?? NEXT_PUBLIC_FINNHUB_API_KEY;
+    if (!token) return { gainers: [], losers: [] };
+
+    // Use a curated list of top 30 stocks to find movers
+    const topSymbols = POPULAR_STOCK_SYMBOLS.slice(0, 30);
+    
+    const quotes = await Promise.all(
+      topSymbols.map(async (symbol) => {
+        try {
+          const url = `${FINNHUB_BASE_URL}/quote?symbol=${encodeURIComponent(symbol)}&token=${token}`;
+          const q = await fetchJSON<QuoteData>(url, 300); // 5 min cache
+          return {
+            symbol,
+            price: q.c,
+            change: q.dp || 0
+          };
+        } catch (e) {
+          return null;
+        }
+      })
+    );
+
+    const validQuotes = quotes.filter((q): q is { symbol: string; price: number | undefined; change: number } => q !== null && q.price !== undefined);
+    
+    const gainers = [...validQuotes].sort((a, b) => b.change - a.change).slice(0, 5);
+    const losers = [...validQuotes].sort((a, b) => a.change - b.change).slice(0, 5);
+
+    return { gainers, losers };
+  } catch (err) {
+    console.error('getMarketMovers error:', err);
+    return { gainers: [], losers: [] };
+  }
+});
+
+export const getEconomicCalendar = cache(async (): Promise<EconomicEvent[]> => {
+  try {
+    const token = process.env.FINNHUB_API_KEY ?? NEXT_PUBLIC_FINNHUB_API_KEY;
+    if (!token) return [];
+
+    // Fetch events for the next 7 days
+    const today = new Date().toISOString().split('T')[0];
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 7);
+    const toDate = futureDate.toISOString().split('T')[0];
+
+    const url = `${FINNHUB_BASE_URL}/calendar/economic?from=${today}&to=${toDate}&token=${token}`;
+    const data = await fetchJSON<{ economicCalendar: EconomicEvent[] }>(url, 3600);
+    
+    // Sort by time and limit to first 5
+    const sorted = (data.economicCalendar || [])
+        .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime())
+        .slice(0, 5);
+        
+    return sorted;
+  } catch (err) {
+    console.error('getEconomicCalendar error:', err);
+    return [];
+  }
+});
